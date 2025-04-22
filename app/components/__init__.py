@@ -1,0 +1,1 @@
+"""Component modules for the Personal Knowledge Assistant.""" 
