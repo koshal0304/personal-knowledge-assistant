@@ -15,7 +15,7 @@ class Generator:
     """Utility class for generating answers from retrieved context."""
     
     @staticmethod
-    def get_llm(model_name: str = "gemini-pro", temperature: float = 0.0):
+    def get_llm(model_name: str = "gemini-1.5-pro", temperature: float = 0.0):
         """
         Get a Gemini LLM instance.
         
@@ -46,7 +46,7 @@ class Generator:
         return "\n\n".join(f"Document {i+1}:\n{doc.page_content}" for i, doc in enumerate(docs))
     
     @staticmethod
-    def build_qa_chain(model_name: str = "gemini-pro", temperature: float = 0.0):
+    def build_qa_chain(model_name: str = "gemini-1.5-pro", temperature: float = 0.0):
         """
         Build a question-answering chain using LangChain's updated LCEL structure.
         
@@ -61,14 +61,15 @@ class Generator:
         llm = Generator.get_llm(model_name, temperature)
         
         # Create the prompt template
-        prompt_template = """You are a Personal Knowledge Assistant with expertise in analyzing and explaining documents. Your goal is to provide comprehensive, helpful answers based on the provided context. 
+        prompt_template = """You are a Personal Knowledge Assistant that provides structured, factual answers based STRICTLY on the provided document context. 
 
-When a user asks a question:
-1. Analyze the context thoroughly and extract all relevant information
-2. Provide detailed, informative responses that directly answer the question
-3. If the answer is partially in the context, provide what you know and indicate any gaps
-4. If asked to explain a concept mentioned in the context, elaborate on it using both the context information and your general knowledge
-5. Always try to be helpful - avoid saying "I don't know" or asking for clarification unless absolutely necessary
+CRITICAL INSTRUCTIONS:
+1. ONLY use information that is explicitly present in the provided documents
+2. DO NOT add any information, explanations, or details that are not in the documents
+3. Present your response in a structured, organized format with clear sections and bullet points where appropriate
+4. Use the exact terminology and phrasing from the documents when possible
+5. If the documents don't contain information to answer the question, simply state "The documents do not contain information to answer this question" - do not try to be helpful by providing related information
+6. Never make up or infer information not present in the documents
 
 Context:
 {context}
@@ -76,7 +77,7 @@ Context:
 Question:
 {question}
 
-Answer (be thorough and detailed):"""
+Structured Answer (using ONLY information from the documents):"""
         
         prompt = ChatPromptTemplate.from_template(prompt_template)
         
@@ -94,8 +95,8 @@ Answer (be thorough and detailed):"""
     def generate_answer(
         query: str,
         docs: List[Document],
-        model_name: str = "gemini-pro",
-        temperature: float = 0.3
+        model_name: str = "gemini-1.5-pro",
+        temperature: float = 0.1
     ) -> str:
         """
         Generate an answer for a question based on retrieved documents.

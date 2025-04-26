@@ -17,7 +17,7 @@ class Retriever:
         vector_store,
         k: int = 5,
         use_compression: bool = False,
-        llm_model_name: str = "gemini-pro"
+        llm_model_name: str = "gemini-1.5-pro"
     ):
         """
         Build a hybrid retriever that combines semantic and keyword search.
@@ -75,8 +75,8 @@ class Retriever:
         Returns:
             List of retrieved documents.
         """
-        # Retrieve documents
-        docs = retriever.get_relevant_documents(query)
+        # Retrieve documents using the newer invoke method
+        docs = retriever.invoke(query)
         
         # Count tokens (approximate method)
         def count_tokens(text):
@@ -87,9 +87,19 @@ class Retriever:
         filtered_docs = []
         current_tokens = 0
         
-        for doc in docs:
+        for i, doc in enumerate(docs):
             doc_tokens = count_tokens(doc.page_content)
+            
             if current_tokens + doc_tokens <= max_tokens:
+                # Add source information to document metadata
+                if 'source' in doc.metadata:
+                    source_info = doc.metadata['source']
+                else:
+                    source_info = f"Document {i+1}"
+                
+                # Enrich the document content with its source info
+                doc.page_content = f"{doc.page_content}\n\nSource: {source_info}"
+                
                 filtered_docs.append(doc)
                 current_tokens += doc_tokens
             else:

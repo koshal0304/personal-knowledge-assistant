@@ -16,8 +16,10 @@ def main():
         print("Please edit the .env file with your API keys before running the application.")
         sys.exit(1)
     
-    # Run the Streamlit app
-    subprocess.run(["streamlit", "run", "app/app.py"])
+    # Run the Streamlit app with options to prevent PyTorch class errors
+    subprocess.run(["streamlit", "run", "app/app.py", 
+                    "--client.toolbarMode=minimal", 
+                    "--server.fileWatcherType=none"])
 
 if __name__ == "__main__":
     main() 
